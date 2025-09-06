@@ -1,0 +1,49 @@
+<svg width="300" height="200" viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="200" fill="#DC2626"/>
+  
+  <!-- Film Camera -->
+  <g transform="translate(150, 80)">
+    <!-- Tripod -->
+    <g stroke="white" stroke-width="2" fill="none">
+      <!-- Left leg -->
+      <line x1="-20" y1="20" x2="-30" y2="40"/>
+      <!-- Right leg -->
+      <line x1="20" y1="20" x2="30" y2="40"/>
+      <!-- Center leg -->
+      <line x1="0" y1="20" x2="0" y2="40"/>
+      <!-- Tripod head -->
+      <circle cx="0" cy="20" r="3" fill="white"/>
+    </g>
+    
+    <!-- Camera Body -->
+    <g stroke="white" stroke-width="2" fill="none">
+      <!-- Main body -->
+      <rect x="-25" y="-15" width="50" height="30" rx="3"/>
+      
+      <!-- Film reels -->
+      <circle cx="-15" cy="-5" r="8" fill="none"/>
+      <circle cx="15" cy="-5" r="8" fill="none"/>
+      
+      <!-- Film reel details -->
+      <circle cx="-15" cy="-5" r="3" fill="none"/>
+      <circle cx="15" cy="-5" r="3" fill="none"/>
+      
+      <!-- Lens -->
+      <circle cx="0" cy="0" r="6" fill="none"/>
+      <circle cx="0" cy="0" r="3" fill="none"/>
+      
+      <!-- Viewfinder -->
+      <rect x="-8" y="-25" width="16" height="8" rx="2" fill="none"/>
+    </g>
+    
+    <!-- Shadow -->
+    <ellipse cx="0" cy="45" rx="35" ry="8" fill="rgba(0,0,0,0.3)"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="150" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">
+    <tspan x="150" dy="0">in high quality</tspan>
+    <tspan x="150" dy="18">audio &amp; video</tspan>
+  </text>
+</svg>
