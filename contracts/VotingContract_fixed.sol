@@ -41,13 +41,13 @@ contract MovieVotingDAO {
     // State variables
     uint256 public proposalCount;
     mapping(uint256 => Proposal) public proposals;
-    uint256 public votingPeriod = 7 days; // Default voting period
-    uint256 public minimumVotes = 10; // Minimum votes to consider a proposal passed
+    uint256 public votingPeriod = 7 days;
+    uint256 public minimumVotes = 10;
     
     // Movie/Upload specific data
     struct MediaProposal {
-        string ipfsHash; // IPFS hash for the media file
-        string metadataHash; // IPFS hash for the metadata
+        string ipfsHash;
+        string metadataHash;
         bool approved;
     }
     
@@ -107,13 +107,12 @@ contract MovieVotingDAO {
         );
     }
 
-    // Voting function
+    // Vote on a proposal
     function vote(uint256 _proposalId, bool _support) external onlyActiveProposal(_proposalId) {
         Proposal storage proposal = proposals[_proposalId];
         require(!proposal.hasVoted[msg.sender], "Already voted");
         
-        // In a real implementation, you might want to check token balance for voting power
-        uint256 votingPower = 1; // 1 vote per address for simplicity
+        uint256 votingPower = 1; // Simple 1 token = 1 vote system
         
         if (_support) {
             proposal.yesVotes += votingPower;
@@ -122,7 +121,6 @@ contract MovieVotingDAO {
         }
         
         proposal.hasVoted[msg.sender] = true;
-        
         emit VoteCast(msg.sender, _proposalId, _support, votingPower);
     }
     
@@ -142,8 +140,6 @@ contract MovieVotingDAO {
                 proposal.proposalType == ProposalType.Upload) {
                 mediaProposals[_proposalId].approved = true;
             }
-            // Add more execution logic for different proposal types
-            
         } else {
             proposal.status = ProposalStatus.Rejected;
         }

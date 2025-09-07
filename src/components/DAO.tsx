@@ -386,7 +386,7 @@ export default function DAO() {
             transition={{ delay: 0.3 }}
           >
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsCreatingProposal(true)}
               className="group inline-flex items-center justify-center gap-2 bg-cinech-gold hover:bg-cinech-gold/90 text-cinech-dark px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cinech-gold/20"
             >
               <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform" />

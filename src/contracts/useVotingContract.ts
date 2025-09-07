@@ -1,8 +1,93 @@
 import { useAccount, useReadContract, useWriteContract, useChainId } from 'wagmi';
-import { MovieVotingDAO } from '@/contracts/abis/MovieVotingDAO';
 import { CONTRACT_ADDRESS } from '@/config';
 import { useCallback, useMemo } from 'react';
-import { Address, isAddress } from 'viem';
+import { Address } from 'viem';
+
+// Contract ABI - Simplified version with only the functions we need
+const MovieVotingDAO_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_title",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_description",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_duration",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum MovieVotingDAO.ProposalType",
+        "name": "_proposalType",
+        "type": "uint8"
+      },
+      {
+        "internalType": "string",
+        "name": "_ipfsHash",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_metadataHash",
+        "type": "string"
+      }
+    ],
+    "name": "createProposal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_proposalId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_support",
+        "type": "bool"
+      }
+    ],
+    "name": "vote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_proposalId",
+        "type": "uint256"
+      }
+    ],
+    "name": "executeProposal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "proposalCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;
 
 export function useVotingContract() {
   const { address } = useAccount();
@@ -10,7 +95,7 @@ export function useVotingContract() {
   
   const contractConfig = useMemo(() => ({
     address: CONTRACT_ADDRESS as `0x${string}`,
-    abi: MovieVotingDAO.abi,
+    abi: MovieVotingDAO_ABI,
   }), []);
 
   // Get proposal count
