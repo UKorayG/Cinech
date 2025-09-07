@@ -100,7 +100,7 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
 
   return (
     <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900/90 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-2xl z-50 max-w-md w-full">
-      <h3 className="text-white font-semibold mb-3 text-center">Sıradaki sahne ne olsun?</h3>
+      <h3 className="text-white font-semibold mb-3 text-center">What should happen next?</h3>
       
       <div className="space-y-3">
         <button
@@ -113,10 +113,10 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
           }`}
         >
           <div className="flex justify-between items-center">
-            <span>Katil Kaçtı</span>
+            <span>Killer Escapes</span>
             {hasVoted && (
               <span className="text-xs bg-green-500/30 px-2 py-0.5 rounded-full">
-                {voteCounts.choice1} oy
+                {voteCounts.choice1} votes
               </span>
             )}
           </div>
@@ -140,10 +140,10 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
           }`}
         >
           <div className="flex justify-between items-center">
-            <span>Katil Yakalandı</span>
+            <span>Killer Caught</span>
             {hasVoted && (
               <span className="text-xs bg-green-500/30 px-2 py-0.5 rounded-full">
-                {voteCounts.choice2} oy
+                {voteCounts.choice2} votes
               </span>
             )}
           </div>
@@ -160,7 +160,7 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
 
       {isLoading && (
         <div className="mt-3 text-center text-sm text-gray-400">
-          Oyunuz işleniyor...
+          Processing your vote...
         </div>
       )}
     </div>

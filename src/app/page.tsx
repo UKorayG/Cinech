@@ -6,7 +6,7 @@ import WalletConnect from '@/components/WalletConnect';
 import dynamic from 'next/dynamic';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-// Çeviri tipleri
+// Translation types
 type TranslationKey = 'welcome' | 'popular' | 'recent' | 'joinRoom' | 'createRoom' | 'roomName' | 'cancel' | 'create';
 type LanguageCode = 'tr' | 'en';
 type Translations = {
@@ -15,7 +15,7 @@ type Translations = {
   };
 };
 
-// Çeviriler
+// Translations
 const translations: Translations = {
   welcome: {
     tr: 'Hoş Geldiniz',
@@ -131,7 +131,7 @@ export default function Home() {
         <WalletConnect />
       </header>
 
-      {/* Ana İçerik */}
+      {/* Main Content */}
       <main className="container mx-auto px-6 py-12 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-6xl font-bold text-white mb-6 font-cinech drop-shadow-2xl">
@@ -159,7 +159,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Özellikler */}
+        {/* Features */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 text-center shadow-2xl border border-white/20 hover:border-cinech-gold/50 transition-all duration-300">
             <div className="bg-cinech-gold w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-bee-buzz shadow-lg">
@@ -217,7 +217,7 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Oda Kartları */}
+        {/* Room Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {rooms.map((room) => (
             <div 
@@ -268,7 +268,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Oda Oluşturma Modalı */}
+      {/* Create Room Modal */}
       {showRoomModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-xl max-w-md w-full border border-white/10 overflow-hidden">
@@ -302,7 +302,7 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => {
-                      // Oda oluşturma işlemleri
+                      // Room creation logic
                       setShowRoomModal(false);
                     }}
                     className="px-4 py-2 bg-cinech-gold hover:bg-cinech-gold-light text-white rounded-lg text-sm font-medium"
@@ -316,7 +316,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Video Oynatıcı Modalı */}
+      {/* Video Player Modal */}
       {showWatchingModal && selectedRoom && (
         <div className="fixed inset-0 bg-black z-50">
           <div className="h-full flex flex-col">

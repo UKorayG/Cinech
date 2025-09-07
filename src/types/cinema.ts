@@ -49,6 +49,6 @@ export interface ClientToServerEvents {
 export const VOTING_MOMENTS = [30, 90, 180]; // Key moments in seconds where voting is triggered
 
 export const SCENE_OPTIONS: SceneOption[] = [
-  { id: 1, text: 'Katil Kaçtı', votes: 0 },
-  { id: 2, text: 'Katil Yakalandı', votes: 0 },
+  { id: 1, text: 'The Killer Escaped', votes: 0 },
+  { id: 2, text: 'The Killer Was Caught', votes: 0 },
 ];

@@ -231,7 +231,7 @@ export default function CinemaRoom({
   // Handle joining the room
   const handleJoinRoom = async () => {
     if (requiresTicket) {
-      alert('Bu odaya girmek için bilet satın almalısınız!');
+      alert('You need to buy a ticket to enter this room!');
       return;
     }
     
@@ -243,13 +243,13 @@ export default function CinemaRoom({
         setHasJoined(true);
         setMessages(prev => [...prev, {
           user: 'System',
-          text: 'Odaya katıldınız!',
+          text: 'You have joined the room!',
           timestamp: Date.now()
         }]);
       }
     } catch (error) {
-      console.error('Odaya katılırken hata oluştu:', error);
-      alert('Odaya katılırken bir hata oluştu. Lütfen tekrar deneyin.');
+      console.error('An error occurred while joining the room:', error);
+      alert('An error occurred while joining the room. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -388,7 +388,7 @@ export default function CinemaRoom({
                 <button 
                   type="submit"
                   className="bg-yellow-500 text-black px-4 rounded-r-lg hover:bg-yellow-600 transition-colors"
-                  aria-label="Gönder"
+                  aria-label="Send"
                 >
                   <Send className="h-5 w-5" />
                 </button>

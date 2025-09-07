@@ -12,18 +12,21 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin',
-          },
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
-          },
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: 'http://localhost:3000',
-          },
+          // Commented out for Coinbase Wallet SDK compatibility
+          // {
+          //   key: 'Cross-Origin-Opener-Policy',
+          //   value: 'same-origin',
+          // },
+          // Commented out for Coinbase Wallet SDK compatibility
+          // {
+          //   key: 'Cross-Origin-Embedder-Policy',
+          //   value: 'require-corp',
+          // },
+          // Commented out for development
+          // {
+          //   key: 'Access-Control-Allow-Origin',
+          //   value: 'http://localhost:3000',
+          // },
           {
             key: 'Access-Control-Allow-Methods',
             value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT',

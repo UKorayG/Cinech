@@ -2,8 +2,8 @@ import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { http } from 'wagmi';
 import { mainnet, sepolia, polygon, arbitrum, optimism } from 'wagmi/chains';
 
-// Get this from your .env file in a real application
-const WALLETCONNECT_PROJECT_ID = 'c4f79b401b6b2e5f3a3f3e3a3f3e3a3f';
+// Get from environment variables with fallback
+const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'default_project_id';
 
 export const config = getDefaultConfig({
   appName: 'Cinech - Watch to Earn',
