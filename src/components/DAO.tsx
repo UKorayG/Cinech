@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Grid, List, X, Clock, CheckCircle, XCircle, Loader2, Film, Upload, ArrowRight, ListChecks } from 'lucide-react';
-import { useVotingContract } from '@/contracts/useVotingContract';
+import { DaoContractError, useVotingContract } from '@/contracts/useVotingContract';
+import ContractNotice from '@/components/dao/ContractNotice';
 import { Proposal } from '@/contracts/types';
 import { useAccount } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
@@ -33,12 +34,23 @@ export default function DAO() {
   const { language } = useLanguage();
   const en = language === 'en';
   const { 
+    contract,
     getProposals, 
     createMovieProposal, 
     createUploadProposal, 
     voteOnProposal,
     executeProposal
   } = useVotingContract();
+  const canWrite = contract.canWrite;
+
+  const errorText = (error: unknown) => {
+    if (error instanceof DaoContractError) {
+      if (error.status === 'wallet') return en ? 'Connect your wallet first.' : 'Önce cüzdanını bağla.';
+      if (error.status === 'chain') return en ? 'Switch your wallet to Sepolia.' : 'Cüzdanını Sepolia ağına geçir.';
+      return en ? 'The DAO contract is not available; on-chain actions are disabled.' : 'DAO sözleşmesi kullanılamıyor; zincir işlemleri kapalı.';
+    }
+    return en ? 'Transaction failed. See the console for details.' : 'İşlem başarısız. Ayrıntı için konsola bak.';
+  };
 
   const [newProposal, setNewProposal] = useState<{
     title: string;
@@ -256,7 +268,7 @@ export default function DAO() {
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error creating proposal:', error);
-      alert('Failed to create proposal. See console for details.');
+      alert(errorText(error));
     } finally {
       setIsSubmitting(false);
       setUploadProgress(0);
@@ -265,7 +277,7 @@ export default function DAO() {
 
   const handleVote = async (proposalId: bigint | number, support: boolean) => {
     if (!address) {
-      alert('Please connect your wallet to vote');
+      alert(en ? 'Connect your wallet to vote.' : 'Oy vermek için cüzdanını bağla.');
       return;
     }
 
@@ -292,7 +304,7 @@ export default function DAO() {
       }));
     } catch (error) {
       console.error('Error voting:', error);
-      alert('Failed to submit vote. See console for details.');
+      alert(errorText(error));
     }
   };
 
@@ -307,7 +319,7 @@ export default function DAO() {
       setProposals(updatedProposals);
     } catch (error) {
       console.error('Error executing proposal:', error);
-      alert('Failed to execute proposal. See console for details.');
+      alert(errorText(error));
     }
   };
 
@@ -390,7 +402,8 @@ export default function DAO() {
           >
             <button
               onClick={() => setIsCreatingProposal(true)}
-              className="btn-cream group"
+              disabled={!canWrite}
+              className="btn-cream group disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform" />
               {en ? 'Create Proposal' : 'Teklif Oluştur'}
@@ -405,6 +418,8 @@ export default function DAO() {
             </button>
           </motion.div>
         </motion.div>
+
+        <ContractNotice contract={contract} />
 
         {/* Proposals Section */}
         <div id="proposals" className="pt-8">
@@ -495,8 +510,9 @@ export default function DAO() {
                     </p>
                     {activeTab === 'active' && (
                       <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="btn-outline mt-6 text-cinech-cream !px-5 !py-2 !text-sm"
+                        onClick={() => setIsCreatingProposal(true)}
+                        disabled={!canWrite}
+                        className="btn-outline mt-6 text-cinech-cream !px-5 !py-2 !text-sm disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Plus className="h-4 w-4" />
                         {en ? 'Create Proposal' : 'Teklif Oluştur'}
@@ -566,10 +582,11 @@ export default function DAO() {
                                 <span>{getTimeLeft(proposal.endTime)}</span>
                               </div>
                               <button 
-                                className="text-cinech-brown hover:text-cinech-brown/80 text-sm font-medium flex items-center group"
+                                className="text-cinech-brown hover:text-cinech-brown/80 text-sm font-medium flex items-center group disabled:cursor-not-allowed disabled:opacity-50"
                                 onClick={() => handleVote(proposal.id, true)}
+                                disabled={!canWrite}
                               >
-                                Vote Now
+                                {en ? 'Vote now' : 'Oy ver'}
                                 <ArrowRight className="h-3.5 w-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
                               </button>
                             </div>
@@ -580,18 +597,20 @@ export default function DAO() {
                           <div className="bg-cinech-ink-light/60 px-6 py-3 flex justify-between items-center border-t border-white/5">
                             <button
                               onClick={() => handleVote(proposal.id, true)}
-                              className="flex-1 flex items-center justify-center gap-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 px-4 py-2 rounded-lg transition-colors"
+                              disabled={!canWrite}
+                              className="flex-1 flex items-center justify-center gap-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 px-4 py-2 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <CheckCircle className="h-4 w-4" />
-                              Vote Yes
+                              {en ? 'Vote yes' : 'Evet'}
                             </button>
                             <div className="w-4"></div>
                             <button
-onClick={() => handleVote(proposal.id, false)}
-                              className="flex-1 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-lg transition-colors"
+                              onClick={() => handleVote(proposal.id, false)}
+                              disabled={!canWrite}
+                              className="flex-1 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <XCircle className="h-4 w-4" />
-                              Vote No
+                              {en ? 'Vote no' : 'Hayır'}
                             </button>
                           </div>
                         )}
@@ -672,11 +691,11 @@ onClick={() => handleVote(proposal.id, false)}
                     onClick={() => setIsCreatingProposal(false)}
                     className="px-4 py-2.5 text-cinech-cream/75 hover:text-cinech-cream text-sm font-medium transition-colors"
                   >
-                    Cancel
+                    {en ? 'Cancel' : 'Vazgeç'}
                   </button>
                   <button
                     onClick={handleCreateProposal}
-                    disabled={!newProposal.title?.trim() || !newProposal.description?.trim()}
+                    disabled={!canWrite || !newProposal.title?.trim() || !newProposal.description?.trim()}
                     className="btn-olive !px-5 !py-2 !text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {en ? 'Create Proposal' : 'Teklif Oluştur'}

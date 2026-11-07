@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "socket": "node server/socket.js"
+    "socket": "node server/socket.js",
+    "compile": "hardhat compile",
+    "abi": "node scripts/export-abi.js",
+    "deploy:sepolia": "hardhat run scripts/deploy-dao.js --network sepolia"
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",

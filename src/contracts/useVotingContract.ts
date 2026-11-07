@@ -1,259 +1,155 @@
-import { useAccount, useReadContract, useWriteContract, useChainId } from 'wagmi';
-import { CONTRACT_ADDRESS } from '@/config';
-import type { MediaProposal, Proposal } from './types';
+'use client';
+
 import { useCallback, useMemo } from 'react';
-import { Address } from 'viem';
+import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi';
+import type { Address } from 'viem';
+import { ACTIVE_CHAIN } from '@/lib/wagmi';
+import { useDaoContract, type DaoContractStatus } from '@/hooks/useDaoContract';
+import { MovieVotingDAO } from './abis/MovieVotingDAO';
+import { ProposalType, type MediaProposal, type Proposal, type ProposalStatus } from './types';
 
-// Contract ABI - Simplified version with only the functions we need
-const MovieVotingDAO_ABI = [
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_title",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_description",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_duration",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum MovieVotingDAO.ProposalType",
-        "name": "_proposalType",
-        "type": "uint8"
-      },
-      {
-        "internalType": "string",
-        "name": "_ipfsHash",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_metadataHash",
-        "type": "string"
-      }
-    ],
-    "name": "createProposal",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_proposalId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "_support",
-        "type": "bool"
-      }
-    ],
-    "name": "vote",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_proposalId",
-        "type": "uint256"
-      }
-    ],
-    "name": "executeProposal",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "proposalCount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+const ABI = MovieVotingDAO.abi;
+
+/** Zincir işlemi engellendiğinde fırlatılır; arayüz `status` alanına göre açıklama gösterir */
+export class DaoContractError extends Error {
+  constructor(readonly status: DaoContractStatus | 'wallet' | 'chain') {
+    super(`DAO contract not writable: ${status}`);
+    this.name = 'DaoContractError';
   }
-] as const;
+}
 
+/**
+ * MovieVotingDAO ile konuşan kanca. Okumalar doğrulanmış sözleşme adresinden yapılır; yazmalar
+ * yalnızca sözleşme doğrulanmış, cüzdan bağlı ve Sepolia'dayken gönderilir.
+ */
 export function useVotingContract() {
-  const { address } = useAccount();
-  const chainId = useChainId();
-  
-  const contractConfig = useMemo(() => ({
-    address: CONTRACT_ADDRESS as `0x${string}`,
-    abi: MovieVotingDAO_ABI,
-  }), []);
+  const { address: account } = useAccount();
+  const contract = useDaoContract();
+  const publicClient = usePublicClient({ chainId: ACTIVE_CHAIN.id });
+  const { writeContractAsync } = useWriteContract();
 
-  // Get proposal count
-  const { data: proposalCount = 0n } = useReadContract({
-    address: contractConfig.address,
-    abi: contractConfig.abi,
+  const { data: proposalCount = 0n, refetch: refetchCount } = useReadContract({
+    address: contract.address,
+    abi: ABI,
     functionName: 'proposalCount',
+    chainId: ACTIVE_CHAIN.id,
+    query: { enabled: contract.ready },
   });
 
-  // Get write contract functions
-  const { writeContractAsync: writeContract } = useWriteContract();
+  const assertWritable = useCallback((): Address => {
+    if (contract.status !== 'ready' || !contract.address) throw new DaoContractError(contract.status);
+    if (!contract.isConnected || !account) throw new DaoContractError('wallet');
+    if (!contract.onActiveChain) throw new DaoContractError('chain');
+    return contract.address;
+  }, [contract, account]);
 
-  // Read functions
-  const getProposal = useCallback(async (proposalId: number) => {
-    if (!address) throw new Error('Wallet not connected');
-    
-    // These would be replaced with actual contract calls in a real implementation
-    const proposalData = null as Proposal | null; // Replace with actual contract call
-    const mediaData = null as MediaProposal | null; // Replace with actual contract call
-    const voted = false;       // Replace with actual contract call
-    
-    if (!proposalData) throw new Error('Proposal not found');
-    
-    return {
-      ...proposalData,
-      mediaProposal: mediaData ?? undefined,
-      hasVoted: voted
-    };
-  }, [address]);
-
-  const getMediaProposal = useCallback(async (proposalId: bigint) => {
-    // This would be replaced with actual contract call in a real implementation
-    return null;
-  }, []);
-
-  const hasVoted = useCallback(async (proposalId: bigint, voter: Address) => {
-    // This would be replaced with actual contract call in a real implementation
-    return false;
-  }, []);
-
-  const createMovieProposal = useCallback(async (
-    title: string,
-    description: string,
-    duration: number,
-    ipfsHash: string,
-    metadataHash: string
-  ) => {
-    if (!writeContract) {
-      throw new Error('Contract write not initialized');
-    }
-    
-    return writeContract({
-      address: contractConfig.address,
-      abi: contractConfig.abi,
-      functionName: 'createProposal',
-      args: [
+  const getProposal = useCallback(
+    async (proposalId: number | bigint): Promise<Proposal> => {
+      if (!publicClient || !contract.ready || !contract.address) throw new DaoContractError(contract.status);
+      const address = contract.address;
+      const id = BigInt(proposalId);
+      const [raw, media, voted] = await Promise.all([
+        publicClient.readContract({ address, abi: ABI, functionName: 'getProposal', args: [id] }),
+        publicClient.readContract({ address, abi: ABI, functionName: 'getMediaProposal', args: [id] }),
+        account ? publicClient.readContract({ address, abi: ABI, functionName: 'hasVoted', args: [id, account] }) : Promise.resolve(false),
+      ]);
+      const [pid, title, description, startTime, endTime, yesVotes, noVotes, creator, proposalType, status, executed] = raw;
+      if (pid === 0n) throw new Error(`Proposal ${id} not found`);
+      const [ipfsHash, metadataHash, approved] = media;
+      const mediaProposal: MediaProposal | undefined = ipfsHash || metadataHash ? { ipfsHash, metadataHash, approved } : undefined;
+      return {
+        id: pid,
         title,
         description,
-        BigInt(duration),
-        0, // ProposalType.Movie
-        ipfsHash,
-        metadataHash
-      ] as const,
-    });
-  }, [writeContract, contractConfig]);
+        startTime,
+        endTime,
+        yesVotes,
+        noVotes,
+        creator,
+        proposalType: proposalType as ProposalType,
+        status: status as ProposalStatus,
+        executed,
+        hasVoted: voted,
+        mediaProposal,
+      };
+    },
+    [publicClient, contract, account],
+  );
 
-  const createUploadProposal = useCallback(async (
-    title: string,
-    description: string,
-    duration: number,
-    ipfsHash: string,
-    metadataHash: string
-  ) => {
-    if (!writeContract) {
-      throw new Error('Contract write not initialized');
-    }
-    
-    return writeContract({
-      address: contractConfig.address,
-      abi: contractConfig.abi,
-      functionName: 'createProposal',
-      args: [
-        title,
-        description,
-        BigInt(duration),
-        1, // ProposalType.Upload
-        ipfsHash,
-        metadataHash
-      ] as const,
-    });
-  }, [writeContract, contractConfig]);
+  const getProposals = useCallback(
+    async (from = 1, to?: number): Promise<Proposal[]> => {
+      if (!publicClient || !contract.ready || !contract.address) return [];
+      const count = Number(await publicClient.readContract({ address: contract.address, abi: ABI, functionName: 'proposalCount' }));
+      const last = Math.min(count, to ?? count);
+      const ids = Array.from({ length: Math.max(0, last - from + 1) }, (_, i) => from + i);
+      const results = await Promise.allSettled(ids.map((id) => getProposal(id)));
+      return results.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []));
+    },
+    [publicClient, contract, getProposal],
+  );
 
-  const voteOnProposal = useCallback(async (proposalId: number, support: boolean) => {
-    if (!writeContract) {
-      throw new Error('Vote function not initialized');
-    }
-    
-    return writeContract({
-      address: contractConfig.address,
-      abi: contractConfig.abi,
-      functionName: 'vote',
-      args: [BigInt(proposalId), support] as const,
-    });
-  }, [writeContract, contractConfig]);
+  const createProposal = useCallback(
+    async (type: ProposalType, title: string, description: string, durationSeconds: number, ipfsHash: string, metadataHash: string) => {
+      const address = assertWritable();
+      const hash = await writeContractAsync({
+        address,
+        abi: ABI,
+        functionName: 'createProposal',
+        args: [title, description, BigInt(durationSeconds), type, ipfsHash, metadataHash],
+        chainId: ACTIVE_CHAIN.id,
+      });
+      await publicClient?.waitForTransactionReceipt({ hash });
+      await refetchCount();
+      return hash;
+    },
+    [assertWritable, writeContractAsync, publicClient, refetchCount],
+  );
 
-  const executeProposal = useCallback(async (proposalId: number) => {
-    if (!writeContract) {
-      throw new Error('Execute proposal function not initialized');
-    }
-    
-    return writeContract({
-      address: contractConfig.address,
-      abi: contractConfig.abi,
-      functionName: 'executeProposal',
-      args: [BigInt(proposalId)] as const,
-    });
-  }, [writeContract, contractConfig]);
+  const createMovieProposal = useCallback(
+    (title: string, description: string, duration: number, ipfsHash: string, metadataHash: string) =>
+      createProposal(ProposalType.Movie, title, description, duration, ipfsHash, metadataHash),
+    [createProposal],
+  );
 
+  const createUploadProposal = useCallback(
+    (title: string, description: string, duration: number, ipfsHash: string, metadataHash: string) =>
+      createProposal(ProposalType.Upload, title, description, duration, ipfsHash, metadataHash),
+    [createProposal],
+  );
 
-  const getProposalCount = useCallback(async () => {
-    return Number(proposalCount);
-  }, [proposalCount]);
+  const voteOnProposal = useCallback(
+    async (proposalId: number | bigint, support: boolean) => {
+      const address = assertWritable();
+      const hash = await writeContractAsync({ address, abi: ABI, functionName: 'vote', args: [BigInt(proposalId), support], chainId: ACTIVE_CHAIN.id });
+      await publicClient?.waitForTransactionReceipt({ hash });
+      return hash;
+    },
+    [assertWritable, writeContractAsync, publicClient],
+  );
 
-  const getProposals = useCallback(async (from = 0, to = 10) => {
-    const count = await getProposalCount();
-    const end = Math.min(count, to);
-    const proposals = [];
-    
-    for (let i = from; i < end; i++) {
-      try {
-        const proposal = await getProposal(i + 1);
-        if (proposal) {
-          proposals.push(proposal);
-        }
-      } catch (error) {
-        console.error(`Error fetching proposal ${i + 1}:`, error);
-      }
-    }
-    
-    return proposals;
-  }, [getProposalCount, getProposal]);
+  const executeProposal = useCallback(
+    async (proposalId: number | bigint) => {
+      const address = assertWritable();
+      const hash = await writeContractAsync({ address, abi: ABI, functionName: 'executeProposal', args: [BigInt(proposalId)], chainId: ACTIVE_CHAIN.id });
+      await publicClient?.waitForTransactionReceipt({ hash });
+      return hash;
+    },
+    [assertWritable, writeContractAsync, publicClient],
+  );
 
-  return useMemo(() => ({
-    createMovieProposal,
-    createUploadProposal,
-    voteOnProposal,
-    executeProposal,
-    getProposal,
-    getProposalCount,
-    getProposals,
-  }), [
-    createMovieProposal,
-    createUploadProposal,
-    voteOnProposal,
-    executeProposal,
-    getProposal,
-    getProposalCount,
-    getProposals,
-  ]);
+  const getProposalCount = useCallback(async () => Number(proposalCount), [proposalCount]);
+
+  return useMemo(
+    () => ({
+      contract,
+      createMovieProposal,
+      createUploadProposal,
+      voteOnProposal,
+      executeProposal,
+      getProposal,
+      getProposalCount,
+      getProposals,
+    }),
+    [contract, createMovieProposal, createUploadProposal, voteOnProposal, executeProposal, getProposal, getProposalCount, getProposals],
+  );
 }

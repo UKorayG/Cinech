@@ -102,3 +102,16 @@ Yol haritasının on maddesi yerel-öncelikli (localStorage) olarak uygulandı; 
 Canlı odalar için `.env.local` içine `NEXT_PUBLIC_SOCKET_URL=http://localhost:3101` yazıp ayrı bir terminalde `npm run socket` çalıştır. Değişken yoksa odalar "yerel mod"da çalışır. Service worker yalnızca üretim derlemesinde (`next build && next start`) kaydolur.
 
 Yerel depolama anahtarları `cinech:` önekiyle başlar: `cinech:defter:<sahip>`, `cinech:favorites`, `cinech:reminders`, `cinech:afis:*`, `cinech:studyo:basvurular:<sahip>`, `cinech:search:recent`, `cinech:room:name`, `cinech:lang`.
+
+## Sözleşme: Sepolia'ya dağıtım
+
+Depodaki eski DAO adresi bize ait olmayan bir sözleşmeydi ve kaldırıldı. Uygulama artık adresi yalnızca `NEXT_PUBLIC_DAO_CONTRACT_ADDRESS` ortam değişkeninden okur; adres yoksa ya da adresteki bytecode oylama fonksiyonlarını taşımıyorsa DAO sayfası zincir işlemlerini kapalı tutar ve nedenini gösterir.
+
+Kendi sözleşmeni dağıtmak için:
+
+1. `.env.local` içine dağıtım cüzdanının özel anahtarını `PRIVATE_KEY=` olarak ekle (yalnızca test cüzdanı; dosya depoya girmez) ve cüzdanda biraz Sepolia ETH olsun.
+2. `npm run compile` ile `contracts/VotingContract.sol` derlenir.
+3. `npm run deploy:sepolia` sözleşmeyi dağıtır, adresi `deployments/sepolia.json` ve `.env.local` dosyasına yazar, ABI'yi `src/contracts/abis/MovieVotingDAO.ts` içine eşitler.
+4. Dev sunucusunu yeniden başlat; DAO sayfasında "Sözleşme doğrulandı" rozeti görünür. Vercel'de de aynı ortam değişkenini ayarla.
+
+İsteğe bağlı: `ETHERSCAN_API_KEY` ile `npx hardhat verify --network sepolia <adres>`.

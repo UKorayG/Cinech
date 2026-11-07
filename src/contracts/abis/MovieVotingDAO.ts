@@ -1,5 +1,4 @@
-// This is the ABI generated from the MovieVotingDAO.sol contract
-// You can generate this automatically using hardhat or another Solidity compiler
+// scripts/export-abi.js tarafından contracts/VotingContract.sol derlemesinden üretilir; elle düzenleme.
 export const MovieVotingDAO = {
   abi: [
     {
@@ -256,8 +255,50 @@ export const MovieVotingDAO = {
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "mediaProposals",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "ipfsHash",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "metadataHash",
+          "type": "string"
+        },
+        {
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "minimumVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "proposalCount",
       "outputs": [
         {
           "internalType": "uint256",
@@ -338,19 +379,6 @@ export const MovieVotingDAO = {
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "proposalCount",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -381,5 +409,5 @@ export const MovieVotingDAO = {
       "stateMutability": "view",
       "type": "function"
     }
-  ]
+  ],
 } as const;

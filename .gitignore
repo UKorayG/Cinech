@@ -45,3 +45,7 @@ next-env.d.ts
 
 # örnek env dosyası depoda kalsın
 !.env.example
+
+# hardhat
+/artifacts
+/cache
