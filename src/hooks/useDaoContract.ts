@@ -52,15 +52,19 @@ export function useDaoContract() {
 
   const onActiveChain = chain?.id === ACTIVE_CHAIN.id;
 
-  return {
-    address: CONTRACT_ADDRESS,
-    status,
-    ready: status === 'ready',
-    isConnected,
-    onActiveChain,
-    /** Sözleşme doğrulanmış, cüzdan bağlı ve doğru ağda */
-    canWrite: status === 'ready' && isConnected && onActiveChain,
-    chainName: ACTIVE_CHAIN.name,
-    explorerUrl: CONTRACT_ADDRESS ? `https://sepolia.etherscan.io/address/${CONTRACT_ADDRESS}` : null,
-  };
+  // Nesne kimliği yalnızca durum değişince değişsin; bağımlı kancalar ve efektler döngüye girmesin.
+  return useMemo(
+    () => ({
+      address: CONTRACT_ADDRESS,
+      status,
+      ready: status === 'ready',
+      isConnected,
+      onActiveChain,
+      /** Sözleşme doğrulanmış, cüzdan bağlı ve doğru ağda */
+      canWrite: status === 'ready' && isConnected && onActiveChain,
+      chainName: ACTIVE_CHAIN.name,
+      explorerUrl: CONTRACT_ADDRESS ? `https://sepolia.etherscan.io/address/${CONTRACT_ADDRESS}` : null,
+    }),
+    [status, isConnected, onActiveChain],
+  );
 }
