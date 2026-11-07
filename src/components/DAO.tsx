@@ -8,6 +8,7 @@ import { Proposal } from '@/contracts/types';
 import { useAccount } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
 import { DEFAULT_VOTING_DURATION } from '@/config';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type ProposalTypeUI = 'movie' | 'upload';
 
@@ -29,6 +30,8 @@ export default function DAO() {
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
 
   const { address } = useAccount();
+  const { language } = useLanguage();
+  const en = language === 'en';
   const { 
     getProposals, 
     createMovieProposal, 
@@ -312,7 +315,7 @@ export default function DAO() {
     <div className="relative min-h-screen overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-gray-900/80">
+        <div className="absolute inset-0 bg-gradient-to-br from-cinech-ink/30 via-cinech-ink-light/20 to-cinech-ink/80">
           <div className="absolute inset-0 bg-[url('/grid.svg')] [mask-image:linear-gradient(180deg,white,transparent)] opacity-5"></div>
           <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_100%_200px,#3b82f6,transparent)] opacity-20 animate-blob"></div>
           <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_50%_800px,#8b5cf6,transparent)] opacity-20 animate-blob animation-delay-2000"></div>
@@ -355,28 +358,28 @@ export default function DAO() {
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-4"
+            className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-cinech-olive mb-6"
           >
-            <div className="w-2 h-2 rounded-full bg-cinech-gold animate-pulse mr-2"></div>
-            <span className="text-sm font-medium text-cinech-gold">DAO Governance</span>
+            <span className="h-2 w-2 rounded-full bg-cinech-olive animate-rec-blink"></span>
+            <span>[{en ? 'DAO Governance' : 'DAO Yönetişimi'}] 05</span>
           </motion.div>
 
           <motion.h2 
-            className="text-4xl md:text-5xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300"
+            className="font-display text-6xl md:text-8xl uppercase leading-[0.9] tracking-wide text-cinech-cream text-hard-olive mb-6"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
           >
-            Community Proposals
+            {en ? 'Community Proposals' : 'Topluluk Teklifleri'}
           </motion.h2>
 
           <motion.p 
-            className="text-lg text-gray-300 max-w-2xl mx-auto mb-8"
+            className="text-lg text-cinech-cream/75 max-w-2xl mx-auto mb-8"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            Participate in the future of Cinech. Vote on proposals, submit your ideas, and help shape the platform.
+            {en ? 'Participate in the future of Cinech. Vote on proposals, submit your ideas, and help shape the platform.' : "Cinech'in geleceğine katıl. Tekliflere oy ver, fikrini sun, platformu birlikte şekillendir."}
           </motion.p>
 
           <motion.div 
@@ -387,17 +390,17 @@ export default function DAO() {
           >
             <button
               onClick={() => setIsCreatingProposal(true)}
-              className="group inline-flex items-center justify-center gap-2 bg-cinech-gold hover:bg-cinech-gold/90 text-cinech-dark px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cinech-gold/20"
+              className="btn-cream group"
             >
               <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform" />
-              Create Proposal
+              {en ? 'Create Proposal' : 'Teklif Oluştur'}
             </button>
 
             <button 
               onClick={() => document.getElementById('proposals')?.scrollIntoView({ behavior: 'smooth' })}
-              className="group inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300"
+              className="btn-outline text-cinech-cream group"
             >
-              View Proposals
+              {en ? 'View Proposals' : 'Teklifleri Gör'}
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </motion.div>
@@ -407,7 +410,7 @@ export default function DAO() {
         <div id="proposals" className="pt-8">
           {/* Tabs */}
           <motion.div 
-            className="sticky top-0 z-10 bg-gray-900/80 backdrop-blur-md border-b border-white/5 mb-8"
+            className="sticky top-0 z-10 bg-cinech-ink/80 backdrop-blur-md border-b border-white/5 mb-8"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -418,30 +421,30 @@ export default function DAO() {
                   {['active', 'pending', 'completed'].map((tab) => (
                     <button
                       key={tab}
-                      onClick={() => setActiveTab(tab as any)}
+                      onClick={() => setActiveTab(tab as 'active' | 'pending' | 'completed')}
                       className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors ${
                         activeTab === tab
-                          ? 'text-cinech-gold border-b-2 border-cinech-gold bg-gray-800/50'
-                          : 'text-gray-400 hover:text-white hover:bg-white/5'
+                          ? 'text-cinech-brown border-b-2 border-cinech-brown bg-cinech-ink-light/60'
+                          : 'text-cinech-cream/60 hover:text-cinech-cream hover:bg-white/5'
                       }`}
                     >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      {en ? tab.charAt(0).toUpperCase() + tab.slice(1) : ({ active: 'Aktif', pending: 'Bekleyen', completed: 'Tamamlanan' } as Record<string, string>)[tab]}
                     </button>
                   ))}
                 </div>
 
-                <div className="flex items-center space-x-2 bg-gray-800/50 rounded-lg p-1">
+                <div className="flex items-center space-x-2 bg-cinech-ink-light/60 rounded-lg p-1">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-gray-700 text-cinech-gold' : 'text-gray-400 hover:text-white'}`}
-                    aria-label="Grid view"
+                    className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-cinech-ink-lighter text-cinech-brown' : 'text-cinech-cream/60 hover:text-cinech-cream'}`}
+                    aria-label={en ? 'Grid view' : 'Izgara görünümü'}
                   >
                     <Grid className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-gray-700 text-cinech-gold' : 'text-gray-400 hover:text-white'}`}
-                    aria-label="List view"
+                    className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-cinech-ink-lighter text-cinech-brown' : 'text-cinech-cream/60 hover:text-cinech-cream'}`}
+                    aria-label={en ? 'List view' : 'Liste görünümü'}
                   >
                     <List className="h-5 w-5" />
                   </button>
@@ -472,20 +475,20 @@ export default function DAO() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                 >
-                  <div className="max-w-md mx-auto bg-gradient-to-br from-gray-800/50 to-gray-900/80 backdrop-blur-sm p-8 rounded-2xl border border-white/5 shadow-2xl shadow-black/50">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cinech-gold/10 mb-4">
-                      <ListChecks className="h-8 w-8 text-cinech-gold" />
+                  <div className="max-w-md mx-auto bg-gradient-to-br from-cinech-ink-light/50 to-cinech-ink/80 backdrop-blur-sm p-8 rounded-2xl border border-white/5 shadow-2xl shadow-black/50">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cinech-olive/15 mb-4">
+                      <ListChecks className="h-8 w-8 text-cinech-brown" />
                     </div>
-                    <h4 className="text-xl font-semibold text-white mb-2">
+                    <h4 className="text-xl font-semibold text-cinech-cream mb-2">
                       {activeTab === 'active' 
-                        ? 'No Active Proposals' 
+                        ? (en ? 'No Active Proposals' : 'Aktif teklif yok') 
                         : activeTab === 'pending'
                           ? 'No Pending Proposals'
                           : 'No Completed Proposals'}
                     </h4>
-                    <p className="text-gray-400">
+                    <p className="text-cinech-cream/60">
                       {activeTab === 'active' 
-                        ? 'There are currently no active proposals. Check back later or create a new one.' 
+                        ? (en ? 'There are currently no active proposals. Check back later or create a new one.' : 'Şu an aktif teklif yok. Daha sonra tekrar bak ya da yeni bir teklif oluştur.') 
                         : activeTab === 'pending'
                           ? 'There are no proposals awaiting approval at this time.'
                           : 'No proposals have been completed yet.'}
@@ -493,10 +496,10 @@ export default function DAO() {
                     {activeTab === 'active' && (
                       <button
                         onClick={() => setIsModalOpen(true)}
-                        className="mt-6 inline-flex items-center gap-2 bg-cinech-gold/10 hover:bg-cinech-gold/20 text-cinech-gold px-6 py-2 rounded-lg font-medium transition-colors border border-cinech-gold/20"
+                        className="btn-outline mt-6 text-cinech-cream !px-5 !py-2 !text-sm"
                       >
                         <Plus className="h-4 w-4" />
-                        Create Proposal
+                        {en ? 'Create Proposal' : 'Teklif Oluştur'}
                       </button>
                     )}
                   </div>
@@ -523,22 +526,22 @@ export default function DAO() {
                       exit="hidden"
                       className={`${viewMode === 'grid' ? 'h-full' : ''}`}
                     >
-                      <div className="h-full bg-gradient-to-br from-gray-800/50 to-gray-900/80 backdrop-blur-sm rounded-xl border border-white/5 overflow-hidden transition-all duration-300 hover:border-cinech-gold/30 hover:shadow-lg hover:shadow-cinech-gold/5">
+                      <div className="h-full bg-gradient-to-br from-cinech-ink-light/50 to-cinech-ink/80 backdrop-blur-sm rounded-xl border border-white/5 overflow-hidden transition-all duration-300 hover:border-cinech-brown/30 hover:shadow-lg hover:shadow-cinech-brown/5">
                         <div className="p-6">
                           <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-semibold text-white">{proposal.title}</h3>
+                            <h3 className="text-xl font-semibold text-cinech-cream">{proposal.title}</h3>
                             {renderProposalStatus(getProposalStatus(proposal))}
                           </div>
 
-                          <p className="text-gray-400 mb-6">{proposal.description}</p>
+                          <p className="text-cinech-cream/60 mb-6">{proposal.description}</p>
 
                           <div className="space-y-4">
                             <div>
-                              <div className="flex justify-between text-sm text-gray-400 mb-1">
-                                <span>Voting Progress</span>
+                              <div className="flex justify-between text-sm text-cinech-cream/60 mb-1">
+                                <span>{en ? 'Voting Progress' : 'Oylama durumu'}</span>
                                 <span>{getVotePercentage(proposal, 'yes')}% Yes • {getVotePercentage(proposal, 'no')}% No</span>
                               </div>
-                              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                              <div className="h-2 bg-cinech-ink-lighter rounded-full overflow-hidden">
                                 <div 
                                   className="h-full bg-gradient-to-r from-green-500 to-green-400" 
                                   style={{ width: `${getVotePercentage(proposal, 'yes')}%` }}
@@ -557,13 +560,13 @@ export default function DAO() {
                               </div>
                             </div>
                             
-                            <div className="flex items-center justify-between text-sm text-gray-400 pt-2 border-t border-white/5">
+                            <div className="flex items-center justify-between text-sm text-cinech-cream/60 pt-2 border-t border-white/5">
                               <div className="flex items-center">
-                                <Clock className="h-4 w-4 mr-1.5 text-cinech-gold" />
+                                <Clock className="h-4 w-4 mr-1.5 text-cinech-brown" />
                                 <span>{getTimeLeft(proposal.endTime)}</span>
                               </div>
                               <button 
-                                className="text-cinech-gold hover:text-cinech-gold/80 text-sm font-medium flex items-center group"
+                                className="text-cinech-brown hover:text-cinech-brown/80 text-sm font-medium flex items-center group"
                                 onClick={() => handleVote(proposal.id, true)}
                               >
                                 Vote Now
@@ -574,7 +577,7 @@ export default function DAO() {
                         </div>
                         
                         {getProposalStatus(proposal) === 'active' && (
-                          <div className="bg-gray-800/50 px-6 py-3 flex justify-between items-center border-t border-white/5">
+                          <div className="bg-cinech-ink-light/60 px-6 py-3 flex justify-between items-center border-t border-white/5">
                             <button
                               onClick={() => handleVote(proposal.id, true)}
                               className="flex-1 flex items-center justify-center gap-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 px-4 py-2 rounded-lg transition-colors"
@@ -616,67 +619,67 @@ onClick={() => handleVote(proposal.id, false)}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
-              className="bg-gray-800 rounded-xl max-w-md w-full p-6 relative border border-white/10 shadow-2xl shadow-black/50"
+              className="bg-cinech-ink-light rounded-xl max-w-md w-full p-6 relative border border-white/10 shadow-2xl shadow-black/50"
             >
               <button
                 onClick={() => setIsCreatingProposal(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-1"
+                className="absolute top-4 right-4 text-cinech-cream/60 hover:text-cinech-cream transition-colors p-1"
               >
                 <X className="h-5 w-5" />
               </button>
               
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-1">Create New Proposal</h3>
-                  <p className="text-sm text-gray-400">Submit a new proposal for the community to vote on</p>
+                  <h3 className="text-xl font-semibold text-cinech-cream mb-1">{en ? 'Create New Proposal' : 'Yeni Teklif Oluştur'}</h3>
+                  <p className="text-sm text-cinech-cream/60">{en ? 'Submit a new proposal for the community to vote on' : 'Topluluğun oylaması için yeni bir teklif gönder'}</p>
                 </div>
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Proposal Title</label>
+                    <label className="block text-sm font-medium text-cinech-cream/75 mb-1.5">{en ? 'Proposal Title' : 'Teklif Başlığı'}</label>
                     <input
                       type="text"
                       name="title"
                       value={newProposal.title}
                       onChange={handleInputChange}
-                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-cinech-gold/50 focus:border-transparent"
-                      placeholder="Enter proposal title"
+                      className="w-full bg-cinech-ink-lighter/50 border border-cinech-ink-lighter rounded-lg px-4 py-2.5 text-cinech-cream focus:outline-none focus:ring-2 focus:ring-cinech-brown/50 focus:border-transparent"
+                      placeholder={en ? 'Enter proposal title' : 'Teklif başlığını yaz'}
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Description</label>
+                    <label className="block text-sm font-medium text-cinech-cream/75 mb-1.5">{en ? 'Description' : 'Açıklama'}</label>
                     <textarea
                       name="description"
                       value={newProposal.description}
                       onChange={handleInputChange}
-                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-cinech-gold/50 focus:border-transparent min-h-[120px]"
-                      placeholder="Describe your proposal in detail..."
+                      className="w-full bg-cinech-ink-lighter/50 border border-cinech-ink-lighter rounded-lg px-4 py-2.5 text-cinech-cream focus:outline-none focus:ring-2 focus:ring-cinech-brown/50 focus:border-transparent min-h-[120px]"
+                      placeholder={en ? 'Describe your proposal in detail...' : 'Teklifini ayrıntılı anlat...'}
                     ></textarea>
                   </div>
                   
-                  <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
-                    <div className="flex items-center text-sm text-gray-400 mb-2">
-                      <Clock className="h-4 w-4 mr-2 text-cinech-gold" />
-                      <span>Voting will be active for 7 days</span>
+                  <div className="bg-cinech-ink-light/60 p-4 rounded-lg border border-cinech-ink-lighter/50">
+                    <div className="flex items-center text-sm text-cinech-cream/60 mb-2">
+                      <Clock className="h-4 w-4 mr-2 text-cinech-brown" />
+                      <span>{en ? 'Voting will be active for 7 days' : 'Oylama 7 gün açık kalacak'}</span>
                     </div>
-                    <p className="text-xs text-gray-500">Proposals require a majority of 'Yes' votes to pass.</p>
+                    <p className="text-xs text-cinech-cream/50">{en ? 'Proposals require a majority of \u2018Yes\u2019 votes to pass.' : 'Tekliflerin geçmesi için \u2018Evet\u2019 oylarının çoğunlukta olması gerekir.'}</p>
                   </div>
                 </div>
                 
                 <div className="flex justify-end space-x-3 pt-2">
                   <button
                     onClick={() => setIsCreatingProposal(false)}
-                    className="px-4 py-2.5 text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                    className="px-4 py-2.5 text-cinech-cream/75 hover:text-cinech-cream text-sm font-medium transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleCreateProposal}
                     disabled={!newProposal.title?.trim() || !newProposal.description?.trim()}
-                    className="px-6 py-2.5 bg-cinech-gold hover:bg-cinech-gold/90 text-cinech-dark rounded-lg font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="btn-olive !px-5 !py-2 !text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Create Proposal
+                    {en ? 'Create Proposal' : 'Teklif Oluştur'}
                   </button>
                 </div>
               </div>

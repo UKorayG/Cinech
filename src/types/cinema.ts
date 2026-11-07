@@ -24,26 +24,57 @@ export interface SceneOption {
   votes: number;
 }
 
-// Socket.io event types
-export interface ServerToClientEvents {
-  'chat message': (msg: ChatMessage) => void;
-  'play': (time: number) => void;
-  'pause': (time: number) => void;
-  'seek': (time: number) => void;
-  'user joined': (username: string) => void;
-  'user left': (username: string) => void;
-  'voting started': (options: SceneOption[]) => void;
-  'vote received': (optionId: number) => void;
+// --- Canlı izleme odası protokolü (server/socket.js ile birebir) ---
+
+export interface RoomViewer {
+  id: string;
+  name: string;
 }
 
-export interface ClientToServerEvents {
-  'chat message': (msg: string) => void;
-  'play': (time: number) => void;
-  'pause': (time: number) => void;
-  'seek': (time: number) => void;
-  'join room': (roomId: string, username: string) => void;
-  'leave room': (roomId: string) => void;
-  'submit vote': (optionId: number) => void;
+export interface RoomPlayback {
+  playing: boolean;
+  time: number;
+  /** Sunucu saatine göre ms; katılan izleyici geçen süreyi buna göre ekler */
+  updatedAt: number;
+}
+
+export interface RoomChatMessage {
+  id: string;
+  name: string;
+  text: string;
+  at: number;
+  /** Yalnızca istemcide üretilen bilgi satırları (katıldı, çevrimdışı vb.) */
+  system?: boolean;
+}
+
+export interface RoomReaction {
+  id: string;
+  name: string;
+  emoji: string;
+}
+
+export interface RoomState {
+  viewers: RoomViewer[];
+  playback: RoomPlayback;
+  messages: RoomChatMessage[];
+}
+
+export const ROOM_REACTIONS = ['🎬', '👏', '😂', '😱', '❤️', '🍿'] as const;
+export type RoomReactionEmoji = (typeof ROOM_REACTIONS)[number];
+
+export interface RoomServerToClientEvents {
+  'room:state': (state: RoomState) => void;
+  'room:presence': (presence: { viewers: RoomViewer[] }) => void;
+  'chat:message': (message: RoomChatMessage) => void;
+  'playback:update': (playback: RoomPlayback) => void;
+  reaction: (reaction: RoomReaction) => void;
+}
+
+export interface RoomClientToServerEvents {
+  'room:join': (payload: { roomId: string; name: string }) => void;
+  'chat:message': (payload: { text: string }) => void;
+  'playback:update': (payload: { playing: boolean; time: number }) => void;
+  reaction: (payload: { emoji: RoomReactionEmoji }) => void;
 }
 
 export const VOTING_MOMENTS = [30, 90, 180]; // Key moments in seconds where voting is triggered

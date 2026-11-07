@@ -99,8 +99,8 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
   const totalVotes = voteCounts.choice1 + voteCounts.choice2;
 
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900/90 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-2xl z-50 max-w-md w-full">
-      <h3 className="text-white font-semibold mb-3 text-center">What should happen next?</h3>
+    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-cinech-ink/90 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-2xl z-50 max-w-md w-full">
+      <h3 className="text-cinech-cream font-semibold mb-3 text-center">What should happen next?</h3>
       
       <div className="space-y-3">
         <button
@@ -109,7 +109,7 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
           className={`w-full text-left p-3 rounded-lg transition-colors ${
             hasVoted
               ? 'bg-green-500/20 text-green-400'
-              : 'bg-white/5 hover:bg-white/10 text-white'
+              : 'bg-white/5 hover:bg-white/10 text-cinech-cream'
           }`}
         >
           <div className="flex justify-between items-center">
@@ -121,7 +121,7 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
             )}
           </div>
           {hasVoted && totalVotes > 0 && (
-            <div className="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+            <div className="w-full bg-cinech-ink-lighter rounded-full h-1.5 mt-2">
               <div 
                 className="bg-green-500 h-1.5 rounded-full" 
                 style={{ width: `${(voteCounts.choice1 / totalVotes) * 100}%` }}
@@ -136,7 +136,7 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
           className={`w-full text-left p-3 rounded-lg transition-colors ${
             hasVoted
               ? 'bg-green-500/20 text-green-400'
-              : 'bg-white/5 hover:bg-white/10 text-white'
+              : 'bg-white/5 hover:bg-white/10 text-cinech-cream'
           }`}
         >
           <div className="flex justify-between items-center">
@@ -148,7 +148,7 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
             )}
           </div>
           {hasVoted && totalVotes > 0 && (
-            <div className="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+            <div className="w-full bg-cinech-ink-lighter rounded-full h-1.5 mt-2">
               <div 
                 className="bg-green-500 h-1.5 rounded-full" 
                 style={{ width: `${(voteCounts.choice2 / totalVotes) * 100}%` }}
@@ -159,7 +159,7 @@ export default function VotingInterface({ roomId, onVoteCast }: VotingInterfaceP
       </div>
 
       {isLoading && (
-        <div className="mt-3 text-center text-sm text-gray-400">
+        <div className="mt-3 text-center text-sm text-cinech-cream/60">
           Processing your vote...
         </div>
       )}

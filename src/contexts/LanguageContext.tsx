@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useState } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 
-type Language = 'en';
+type Language = 'tr' | 'en';
 
 type Translations = {
   [key: string]: string;
@@ -147,8 +147,29 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+const STORAGE_KEY = 'cinech:lang';
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>('tr');
+
+  // Seçilen dil tarayıcıda saklanır; sayfa yenilense de korunur.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved === 'tr' || saved === 'en') setLanguageState(saved);
+    } catch {
+      /* depolama kapalı */
+    }
+  }, []);
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, lang);
+    } catch {
+      /* yoksay */
+    }
+  };
 
   const t = (key: string): string => {
     return translations[key] || key;

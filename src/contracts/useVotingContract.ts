@@ -1,5 +1,6 @@
 import { useAccount, useReadContract, useWriteContract, useChainId } from 'wagmi';
 import { CONTRACT_ADDRESS } from '@/config';
+import type { MediaProposal, Proposal } from './types';
 import { useCallback, useMemo } from 'react';
 import { Address } from 'viem';
 
@@ -113,15 +114,15 @@ export function useVotingContract() {
     if (!address) throw new Error('Wallet not connected');
     
     // These would be replaced with actual contract calls in a real implementation
-    const proposalData = null; // Replace with actual contract call
-    const mediaData = null;    // Replace with actual contract call
+    const proposalData = null as Proposal | null; // Replace with actual contract call
+    const mediaData = null as MediaProposal | null; // Replace with actual contract call
     const voted = false;       // Replace with actual contract call
     
     if (!proposalData) throw new Error('Proposal not found');
     
     return {
       ...proposalData,
-      mediaProposal: mediaData,
+      mediaProposal: mediaData ?? undefined,
       hasVoted: voted
     };
   }, [address]);

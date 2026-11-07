@@ -21,8 +21,8 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["node", "web3"]
+    "types": ["node"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "hardhat.config.ts", "contracts"]
 }

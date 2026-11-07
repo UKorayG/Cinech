@@ -5,17 +5,21 @@ import { useLanguage } from '@/contexts/LanguageContext';
 export default function LanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
 
-  const toggleLanguage = () => {
-    setLanguage(language === 'tr' ? 'en' : 'tr');
-  };
-
   return (
-    <button
-      onClick={toggleLanguage}
-      className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-colors duration-200 z-50 flex items-center gap-2"
-      aria-label={language === 'en' ? 'Switch to Turkish' : 'Switch to English'}
-    >
-      {language === 'en' ? 'TR' : 'EN'}
-    </button>
+    <div className="flex items-center rounded-full bg-cinech-ink/30 p-0.5 font-mono text-[11px] font-bold">
+      {(['tr', 'en'] as const).map((code) => (
+        <button
+          key={code}
+          type="button"
+          onClick={() => setLanguage(code)}
+          className={`rounded-full px-2.5 py-1 uppercase tracking-wider transition-colors ${
+            language === code ? 'bg-cinech-cream text-cinech-olive' : 'text-cinech-cream/70 hover:text-cinech-cream'
+          }`}
+          aria-pressed={language === code}
+        >
+          {code}
+        </button>
+      ))}
+    </div>
   );
 }

@@ -1,20 +1,23 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { http } from 'wagmi';
-import { mainnet, sepolia, polygon, arbitrum, optimism } from 'wagmi/chains';
+import { sepolia } from 'wagmi/chains';
 
-// Get from environment variables with fallback
+// WalletConnect proje kimliği: https://cloud.walletconnect.com üzerinden ücretsiz alınır.
 const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'default_project_id';
 
+/**
+ * Test aşaması: uygulama yalnızca Sepolia test ağını kabul eder. Cüzdan başka bir ağdaysa
+ * RainbowKit "Yanlış ağ" uyarısı gösterir ve tek tıkla Sepolia'ya geçirir.
+ * Ana ağa çıkışta `chains` listesine mainnet eklenir ve sözleşme adresleri güncellenir.
+ */
 export const config = getDefaultConfig({
   appName: 'Cinech - Watch to Earn',
   projectId: WALLETCONNECT_PROJECT_ID,
-  chains: [mainnet, sepolia, polygon, arbitrum, optimism],
+  chains: [sepolia],
   transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http('https://rpc.sepolia.org'),
-    [polygon.id]: http('https://polygon-rpc.com'),
-    [arbitrum.id]: http('https://arb1.arbitrum.io/rpc'),
-    [optimism.id]: http('https://mainnet.optimism.io'),
+    [sepolia.id]: http('https://ethereum-sepolia-rpc.publicnode.com'),
   },
   ssr: true,
 });
+
+export const ACTIVE_CHAIN = sepolia;
