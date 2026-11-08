@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code
+.claude/
+
+# örnek env dosyası depoda kalsın
+!.env.example
+
+# hardhat
+/artifacts
+/cache

@@ -3,37 +3,131 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #1c2118;
+  --foreground: #eae4d2;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-stretch: 100%;
 }
 
-/* Gradient animation */
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient 15s ease infinite;
+::selection {
+  background: #3c4a32;
+  color: #eae4d2;
 }
 
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
+/* Archivo kesimleri: afiş başlığı dar ve çok kalın, etiketler hafif dar, menü kalın */
+.font-display {
+  font-stretch: 72%;
+  font-weight: 800;
+}
+.font-cinech {
+  font-weight: 700;
+}
+.font-mono {
+  font-stretch: 88%;
+  font-weight: 500;
+}
+
+/* Film şeridi: koyu bant, üstte ve altta krem perforasyon delikleri */
+.film-strip {
+  background-color: #1c2118;
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 10px, #eae4d2 10px 26px, transparent 26px 40px),
+    repeating-linear-gradient(90deg, transparent 0 10px, #eae4d2 10px 26px, transparent 26px 40px);
+  background-size: 40px 10px, 40px 10px;
+  background-position: 0 7px, 0 calc(100% - 7px);
+  background-repeat: repeat-x;
+}
+
+.film-strip--cream {
+  background-color: #eae4d2;
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 10px, #1c2118 10px 26px, transparent 26px 40px),
+    repeating-linear-gradient(90deg, transparent 0 10px, #1c2118 10px 26px, transparent 26px 40px);
+}
+
+/* Krem kâğıt dokusu */
+.paper {
+  background-color: #eae4d2;
+  background-image: radial-gradient(rgba(28, 33, 24, 0.07) 1px, transparent 1px);
+  background-size: 6px 6px;
+}
+
+/* Bilet perforasyonu */
+.perforation {
+  position: relative;
+}
+.perforation::before,
+.perforation::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: inherit;
+}
+
+/* Blok gölgeli başlık (retro afiş) */
+.text-hard {
+  text-shadow: 4px 4px 0 #1c2118;
+}
+.text-hard-sm {
+  text-shadow: 2px 2px 0 #1c2118;
+}
+.text-hard-cream {
+  text-shadow: 4px 4px 0 #eae4d2;
+}
+.text-hard-olive {
+  text-shadow: 4px 4px 0 #3c4a32;
+}
+.text-hard-brown {
+  text-shadow: 4px 4px 0 #7a4a24;
+}
+
+/* Düğmeler */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-cinech text-sm font-bold uppercase tracking-[0.14em] transition-transform duration-150 active:translate-x-[2px] active:translate-y-[2px];
+}
+.btn-olive {
+  @apply btn bg-cinech-olive text-cinech-cream shadow-hard active:shadow-hard-sm;
+}
+.btn-brown {
+  @apply btn bg-cinech-brown text-cinech-cream shadow-hard active:shadow-hard-sm;
+}
+.btn-cream {
+  @apply btn bg-cinech-cream text-cinech-ink shadow-hard active:shadow-hard-sm;
+}
+.btn-ink {
+  @apply btn bg-cinech-ink text-cinech-cream shadow-hard-cream active:shadow-hard-sm;
+}
+.btn-outline {
+  @apply btn border-2 border-current bg-transparent;
+}
+
+/* Marquee (bant yazı) */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
   }
 }
+
+/* İnce kaydırma çubuğu */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #1c2118; }
+::-webkit-scrollbar-thumb { background: #3a4531; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #3c4a32; }

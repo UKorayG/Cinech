@@ -9,10 +9,10 @@ import '@rainbow-me/rainbowkit/styles.css';
 
 const queryClient = new QueryClient();
 
-// Custom theme for RainbowKit
-const customTheme = darkTheme({
-  accentColor: '#8b5cf6',
-  accentColorForeground: 'white',
+// RainbowKit teması: marka kırmızısı
+const cinechTheme = darkTheme({
+  accentColor: '#EAE4D2',
+  accentColorForeground: '#1C2118',
   borderRadius: 'medium',
   fontStack: 'system',
   overlayBlur: 'small',
@@ -22,13 +22,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider 
-          theme={customTheme}
-          modalSize="compact"
-        >
-          <LanguageProvider>
-            {children}
-          </LanguageProvider>
+        <RainbowKitProvider theme={cinechTheme} modalSize="compact">
+          <LanguageProvider>{children}</LanguageProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

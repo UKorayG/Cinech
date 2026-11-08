@@ -1,5 +1,14 @@
-// Update this with your deployed contract address
-export const CONTRACT_ADDRESS = '0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47' as `0x${string}`; // Sepolia'daki kontrat adresi
+import { getAddress, isAddress } from 'viem';
+
+const raw = process.env.NEXT_PUBLIC_DAO_CONTRACT_ADDRESS?.trim();
+
+/**
+ * Sepolia'daki MovieVotingDAO adresi. `.env.local` içinde NEXT_PUBLIC_DAO_CONTRACT_ADDRESS ile verilir
+ * (scripts/deploy-dao.js dağıtımdan sonra kendisi yazar). Tanımlı değilse ya da adreste doğrulanmış bir
+ * Cinech DAO sözleşmesi yoksa zincire yazma işlemleri kapalı kalır; bkz. hooks/useDaoContract.
+ */
+export const CONTRACT_ADDRESS: `0x${string}` | undefined =
+  raw && isAddress(raw, { strict: false }) ? getAddress(raw) : undefined;
 
 // IPFS configuration
 export const IPFS_GATEWAY = 'https://ipfs.io/ipfs/';
