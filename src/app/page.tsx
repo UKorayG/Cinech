@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Play, Users, Coins, X, Clapperboard, Vote, ArrowRight, Heart, Bell, BellRing, CalendarPlus } from 'lucide-react';
 import { useAccount } from 'wagmi';
@@ -457,7 +458,7 @@ export default function Home() {
 
       <footer className="relative bg-cinech-ink py-12 text-center text-cinech-cream">
         <RetroHud tl="[CINECH]" tr={`[${new Date().getFullYear()}]`} bl="END" br="REC 00:00:00" />
-        <img src="/brand/cinech-dikey-krem.svg" alt="Cinech" className="mx-auto h-40 w-auto" />
+        <Image src="/brand/cinech-dikey-krem.svg" alt="Cinech" width={160} height={160} unoptimized className="mx-auto h-40 w-auto" />
         <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.3em] text-cinech-cream/50">decentralized cinema</div>
       </footer>
 

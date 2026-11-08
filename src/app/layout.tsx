@@ -13,12 +13,26 @@ const archivo = Archivo({
 });
 const yellowtail = Yellowtail({ subsets: ['latin', 'latin-ext'], weight: '400', display: 'swap', variable: '--font-yellowtail' });
 
+/** Sosyal paylaşım görsellerinin tam adresi: önce elle verilen alan adı, sonra Vercel'in verdiği adresler. */
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : undefined) ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined) ??
+  'http://localhost:3100';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'Cinech — Decentralized Cinema',
   description:
     'Bağımsız filmleri izle, CINE token kazan, topluluğun seçtiği yapımlara oy ver. Yankı ile başlıyoruz.',
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'Cinech', statusBarStyle: 'default' },
+  openGraph: {
+    type: 'website',
+    siteName: 'Cinech',
+    locale: 'tr_TR',
+    images: [{ url: '/posters/yanki-bolum-1.jpg', width: 768, height: 1376, alt: 'Yankı · Bölüm 1' }],
+  },
 };
 
 export const viewport: Viewport = { themeColor: '#3C4A32' };

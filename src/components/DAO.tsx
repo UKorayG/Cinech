@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Grid, List, X, Clock, CheckCircle, XCircle, Loader2, Film, Upload, ArrowRight, ListChecks } from 'lucide-react';
+import { Plus, Grid, List, X, Clock, CheckCircle, XCircle, Loader2, ArrowRight, ListChecks, Gavel } from 'lucide-react';
 import { DaoContractError, useVotingContract } from '@/contracts/useVotingContract';
 import ContractNotice from '@/components/dao/ContractNotice';
 import { Proposal } from '@/contracts/types';
 import { useAccount } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
+import { enGB, tr } from 'date-fns/locale';
 import { DEFAULT_VOTING_DURATION } from '@/config';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -17,17 +18,16 @@ interface NewProposal {
   title: string;
   description: string;
   type: ProposalTypeUI;
-  duration: number;
-  file: File | null;
 }
+
+const EMPTY_PROPOSAL: NewProposal = { title: '', description: '', type: 'movie' };
 
 export default function DAO() {
   const [activeTab, setActiveTab] = useState<'active' | 'pending' | 'completed'>('active');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [executingId, setExecutingId] = useState<string | null>(null);
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
 
   const { address } = useAccount();
@@ -52,19 +52,7 @@ export default function DAO() {
     return en ? 'Transaction failed. See the console for details.' : 'İşlem başarısız. Ayrıntı için konsola bak.';
   };
 
-  const [newProposal, setNewProposal] = useState<{
-    title: string;
-    description: string;
-    type: 'movie' | 'upload';
-    duration: number;
-    file: File | null;
-  }>({
-    title: '',
-    description: '',
-    type: 'movie',
-    duration: 7, // days
-    file: null,
-  });
+  const [newProposal, setNewProposal] = useState<NewProposal>(EMPTY_PROPOSAL);
 
   const [proposals, setProposals] = useState<Proposal[]>([]);
 
@@ -92,28 +80,12 @@ export default function DAO() {
 
   // Filter proposals based on active tab
   const filteredProposals = proposals.filter(proposal => {
-    const status = getProposalStatus(proposal);
-    return status === activeTab;
-    return true;
+    return getProposalStatus(proposal) === activeTab;
   });
-
-  // Handle file upload to IPFS
-  const uploadToIPFS = async (file: File) => {
-    try {
-      // In a real implementation, you would upload to IPFS here
-      // For now, we'll simulate a successful upload
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setUploadProgress(100);
-      return `ipfs://mock-cid/${file.name}`;
-    } catch (error) {
-      console.error('Error uploading to IPFS:', error);
-      throw new Error('Failed to upload file to IPFS');
-    }
-  };
 
   const getTimeLeft = (endTime: bigint): string => {
     const endDate = new Date(Number(endTime) * 1000);
-    return formatDistanceToNow(endDate, { addSuffix: true });
+    return formatDistanceToNow(endDate, { addSuffix: true, locale: en ? enGB : tr });
   };
 
   const getProposalStatus = (proposal: Proposal): 'pending' | 'active' | 'completed' => {
@@ -140,23 +112,23 @@ export default function DAO() {
     switch (status) {
       case 'active':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center rounded-full border-2 border-cinech-olive-light bg-cinech-olive px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-cinech-cream">
             <Clock className="h-3 w-3 mr-1" />
-            Active
+            {en ? 'Active' : 'Aktif'}
           </span>
         );
       case 'pending':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+          <span className="inline-flex items-center rounded-full border-2 border-cinech-brown-light bg-cinech-brown px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-cinech-cream">
             <Clock className="h-3 w-3 mr-1" />
-            Pending
+            {en ? 'Pending' : 'Bekliyor'}
           </span>
         );
       case 'completed':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          <span className="inline-flex items-center rounded-full border-2 border-cinech-cream/30 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-cinech-cream/70">
             <CheckCircle className="h-3 w-3 mr-1" />
-            Completed
+            {en ? 'Completed' : 'Tamamlandı'}
           </span>
         );
       default:
@@ -165,24 +137,12 @@ export default function DAO() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const target = e.target as HTMLInputElement;
-    const { name, value, type } = target;
-    
-    if (type === 'file') {
-      const file = target.files?.[0] || null;
+    const { name, value } = e.target;
+
+    if (name === 'type') {
       setNewProposal(prev => ({
         ...prev,
-        file
-      }));
-    } else if (name === 'type') {
-      setNewProposal(prev => ({
-        ...prev,
-        type: value as 'movie' | 'upload'
-      }));
-    } else if (name === 'duration') {
-      setNewProposal(prev => ({
-        ...prev,
-        [name]: parseInt(value) || 0
+        type: value as ProposalTypeUI
       }));
     } else if (name === 'title' || name === 'description') {
       setNewProposal(prev => ({
@@ -194,84 +154,27 @@ export default function DAO() {
 
   const handleCreateProposal = async (e: React.FormEvent) => {
     e.preventDefault();
-    const title = typeof newProposal.title === 'string' ? newProposal.title.trim() : '';
-    const description = typeof newProposal.description === 'string' ? newProposal.description.trim() : '';
-    
+    const title = newProposal.title.trim();
+    const description = newProposal.description.trim();
+
     if (!title || !description) {
-      alert('Please fill in all required fields');
+      alert(en ? 'Please fill in the title and the description.' : 'Lütfen başlığı ve açıklamayı doldur.');
       return;
     }
     try {
       setIsSubmitting(true);
-      setUploadProgress(0);
+      // Medya dosyası yükleme (IPFS) henüz yok; teklif yalnızca metinle zincire yazılır.
+      const create = newProposal.type === 'movie' ? createMovieProposal : createUploadProposal;
+      await create(title, description, DEFAULT_VOTING_DURATION, '', '');
 
-      let ipfsHash = '';
-      let metadataHash = '';
-
-      // Upload file to IPFS if exists
-      if (newProposal.file) {
-        ipfsHash = await uploadToIPFS(newProposal.file);
-
-        // Create metadata JSON
-        const metadata = {
-          name: newProposal.title,
-          description: newProposal.description,
-          type: newProposal.type,
-          created: new Date().toISOString(),
-          file: ipfsHash,
-        };
-
-        // Upload metadata to IPFS
-        const metadataFile = new File(
-          [JSON.stringify(metadata)],
-          'metadata.json',
-          { type: 'application/json' }
-        );
-
-        metadataHash = await uploadToIPFS(metadataFile);
-      }
-
-      // Create proposal on-chain
-      const durationInSeconds = newProposal.duration * 24 * 60 * 60; // Convert days to seconds
-
-      if (newProposal.type === 'movie') {
-        await createMovieProposal(
-          newProposal.title,
-          newProposal.description,
-          durationInSeconds,
-          ipfsHash,
-          metadataHash
-        );
-      } else {
-        await createUploadProposal(
-          newProposal.title,
-          newProposal.description,
-          durationInSeconds,
-          ipfsHash,
-          metadataHash
-        );
-      }
-
-      // Refresh proposals
-      const updatedProposals = await getProposals();
-      setProposals(updatedProposals);
-
-      // Reset form
-      setNewProposal({ 
-        title: '', 
-        description: '', 
-        type: 'movie', 
-        duration: 7, 
-        file: null 
-      });
-
-      setIsModalOpen(false);
+      setProposals(await getProposals());
+      setNewProposal(EMPTY_PROPOSAL);
+      setIsCreatingProposal(false);
     } catch (error) {
       console.error('Error creating proposal:', error);
       alert(errorText(error));
     } finally {
       setIsSubmitting(false);
-      setUploadProgress(0);
     }
   };
 
@@ -309,17 +212,15 @@ export default function DAO() {
   };
 
   const handleExecuteProposal = async (proposalId: bigint | number) => {
+    setExecutingId(String(proposalId));
     try {
-      // Convert to number as the contract expects
-      const id = typeof proposalId === 'bigint' ? Number(proposalId) : proposalId;
-      await executeProposal(id);
-
-      // Update local state
-      const updatedProposals = await getProposals();
-      setProposals(updatedProposals);
+      await executeProposal(proposalId);
+      setProposals(await getProposals());
     } catch (error) {
       console.error('Error executing proposal:', error);
       alert(errorText(error));
+    } finally {
+      setExecutingId(null);
     }
   };
 
@@ -329,9 +230,9 @@ export default function DAO() {
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-cinech-ink/30 via-cinech-ink-light/20 to-cinech-ink/80">
           <div className="absolute inset-0 bg-[url('/grid.svg')] [mask-image:linear-gradient(180deg,white,transparent)] opacity-5"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_100%_200px,#3b82f6,transparent)] opacity-20 animate-blob"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_50%_800px,#8b5cf6,transparent)] opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_400px_at_80%_400px,#ec4899,transparent)] opacity-20 animate-blob animation-delay-4000"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_100%_200px,#52653F,transparent)] opacity-20 animate-blob"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_50%_800px,#7A4A24,transparent)] opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_400px_at_80%_400px,#9A6333,transparent)] opacity-20 animate-blob animation-delay-4000"></div>
         </div>
       </div>
 
@@ -483,7 +384,18 @@ export default function DAO() {
             className={`${viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}`}
           >
             <AnimatePresence>
-              {filteredProposals.length === 0 ? (
+              {isLoading && contract.ready && proposals.length === 0 ? (
+                <motion.div
+                  key="loading"
+                  className={`${viewMode === 'grid' ? 'md:col-span-2 lg:col-span-3' : ''} flex items-center justify-center gap-3 py-16 font-mono text-[11px] uppercase tracking-[0.3em] text-cinech-cream/60`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <Loader2 className="h-5 w-5 animate-spin text-cinech-olive-light" />
+                  {en ? 'Reading proposals from Sepolia…' : 'Teklifler Sepolia’dan okunuyor…'}
+                </motion.div>
+              ) : filteredProposals.length === 0 ? (
                 <motion.div 
                   className={`${viewMode === 'grid' ? 'md:col-span-2 lg:col-span-3' : ''} text-center py-16`}
                   initial={{ opacity: 0, y: 20 }}
@@ -498,15 +410,15 @@ export default function DAO() {
                       {activeTab === 'active' 
                         ? (en ? 'No Active Proposals' : 'Aktif teklif yok') 
                         : activeTab === 'pending'
-                          ? 'No Pending Proposals'
-                          : 'No Completed Proposals'}
+                          ? (en ? 'No Pending Proposals' : 'Bekleyen teklif yok')
+                          : (en ? 'No Completed Proposals' : 'Tamamlanan teklif yok')}
                     </h4>
                     <p className="text-cinech-cream/60">
                       {activeTab === 'active' 
                         ? (en ? 'There are currently no active proposals. Check back later or create a new one.' : 'Şu an aktif teklif yok. Daha sonra tekrar bak ya da yeni bir teklif oluştur.') 
                         : activeTab === 'pending'
-                          ? 'There are no proposals awaiting approval at this time.'
-                          : 'No proposals have been completed yet.'}
+                          ? (en ? 'There are no proposals awaiting approval at this time.' : 'Şu an onay bekleyen teklif yok.')
+                          : (en ? 'No proposals have been completed yet.' : 'Henüz tamamlanan teklif yok.')}
                     </p>
                     {activeTab === 'active' && (
                       <button
@@ -555,24 +467,24 @@ export default function DAO() {
                             <div>
                               <div className="flex justify-between text-sm text-cinech-cream/60 mb-1">
                                 <span>{en ? 'Voting Progress' : 'Oylama durumu'}</span>
-                                <span>{getVotePercentage(proposal, 'yes')}% Yes • {getVotePercentage(proposal, 'no')}% No</span>
+                                <span>%{getVotePercentage(proposal, 'yes')} {en ? 'Yes' : 'Evet'} • %{getVotePercentage(proposal, 'no')} {en ? 'No' : 'Hayır'}</span>
                               </div>
                               <div className="h-2 bg-cinech-ink-lighter rounded-full overflow-hidden">
                                 <div 
-                                  className="h-full bg-gradient-to-r from-green-500 to-green-400" 
+                                  className="h-full bg-gradient-to-r from-cinech-olive to-cinech-olive-light" 
                                   style={{ width: `${getVotePercentage(proposal, 'yes')}%` }}
                                 />
                               </div>
                             </div>
 
                             <div className="flex justify-between text-sm">
-                              <div className="text-green-400">
+                              <div className="text-cinech-olive-light">
                                 <CheckCircle className="inline h-4 w-4 mr-1" />
-                                {proposal.yesVotes} Yes
+                                {proposal.yesVotes.toString()} {en ? 'Yes' : 'Evet'}
                               </div>
-                              <div className="text-red-400">
+                              <div className="text-cinech-brown-light">
                                 <XCircle className="inline h-4 w-4 mr-1" />
-                                {proposal.noVotes} No
+                                {proposal.noVotes.toString()} {en ? 'No' : 'Hayır'}
                               </div>
                             </div>
                             
@@ -584,9 +496,9 @@ export default function DAO() {
                               <button 
                                 className="text-cinech-brown hover:text-cinech-brown/80 text-sm font-medium flex items-center group disabled:cursor-not-allowed disabled:opacity-50"
                                 onClick={() => handleVote(proposal.id, true)}
-                                disabled={!canWrite}
+                                disabled={!canWrite || proposal.hasVoted || getProposalStatus(proposal) !== 'active'}
                               >
-                                {en ? 'Vote now' : 'Oy ver'}
+                                {proposal.hasVoted ? (en ? 'Voted' : 'Oy verildi') : en ? 'Vote now' : 'Oy ver'}
                                 <ArrowRight className="h-3.5 w-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
                               </button>
                             </div>
@@ -597,8 +509,8 @@ export default function DAO() {
                           <div className="bg-cinech-ink-light/60 px-6 py-3 flex justify-between items-center border-t border-white/5">
                             <button
                               onClick={() => handleVote(proposal.id, true)}
-                              disabled={!canWrite}
-                              className="flex-1 flex items-center justify-center gap-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 px-4 py-2 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              disabled={!canWrite || proposal.hasVoted}
+                              className="flex-1 flex items-center justify-center gap-2 rounded-lg border-2 border-cinech-olive-light/40 bg-cinech-olive/20 px-4 py-2 text-cinech-cream transition-colors hover:bg-cinech-olive/40 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <CheckCircle className="h-4 w-4" />
                               {en ? 'Vote yes' : 'Evet'}
@@ -606,11 +518,24 @@ export default function DAO() {
                             <div className="w-4"></div>
                             <button
                               onClick={() => handleVote(proposal.id, false)}
-                              disabled={!canWrite}
-                              className="flex-1 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              disabled={!canWrite || proposal.hasVoted}
+                              className="flex-1 flex items-center justify-center gap-2 rounded-lg border-2 border-cinech-brown-light/40 bg-cinech-brown/20 px-4 py-2 text-cinech-cream transition-colors hover:bg-cinech-brown/40 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <XCircle className="h-4 w-4" />
                               {en ? 'Vote no' : 'Hayır'}
+                            </button>
+                          </div>
+                        )}
+
+                        {getProposalStatus(proposal) === 'completed' && !proposal.executed && (
+                          <div className="bg-cinech-ink-light/60 px-6 py-3 border-t border-white/5">
+                            <button
+                              onClick={() => handleExecuteProposal(proposal.id)}
+                              disabled={!canWrite || executingId === String(proposal.id)}
+                              className="btn-outline w-full justify-center !py-2 !text-sm text-cinech-cream disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {executingId === String(proposal.id) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Gavel className="h-4 w-4" />}
+                              {en ? 'Finalise result' : 'Sonucu kesinleştir'}
                             </button>
                           </div>
                         )}
@@ -695,9 +620,10 @@ export default function DAO() {
                   </button>
                   <button
                     onClick={handleCreateProposal}
-                    disabled={!canWrite || !newProposal.title?.trim() || !newProposal.description?.trim()}
+                    disabled={!canWrite || isSubmitting || !newProposal.title.trim() || !newProposal.description.trim()}
                     className="btn-olive !px-5 !py-2 !text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                     {en ? 'Create Proposal' : 'Teklif Oluştur'}
                   </button>
                 </div>

@@ -4,10 +4,6 @@ import { createContext, useContext, ReactNode, useState, useEffect } from 'react
 
 type Language = 'tr' | 'en';
 
-type Translations = {
-  [key: string]: string;
-};
-
 const translations: Record<string, string> = {
   welcome: 'Welcome',
   home: 'Home',
